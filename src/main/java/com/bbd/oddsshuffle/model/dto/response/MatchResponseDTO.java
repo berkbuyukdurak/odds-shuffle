@@ -20,38 +20,5 @@ public class MatchResponseDTO implements Serializable {
     private double homeOdds;
     private double drawOdds;
     private double awayOdds;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getLeague() {
-        return league;
-    }
-
-    public String getHomeTeam() {
-        return homeTeam;
-    }
-
-    public String getAwayTeam() {
-        return awayTeam;
-    }
-
-    public double getHomeOdds() {
-        return homeOdds;
-    }
-
-    public double getDrawOdds() {
-        return drawOdds;
-    }
-
-    public double getAwayOdds() {
-        return awayOdds;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
     private LocalDateTime startTime;
 }

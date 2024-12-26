@@ -10,6 +10,4 @@ public class OddsHistoryResponseDTO {
     private double drawOdds;
     private double awayOdds;
     private LocalDateTime timestamp;
-
-    // Getters and Setters
 }

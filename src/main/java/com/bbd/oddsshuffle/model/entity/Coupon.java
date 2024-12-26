@@ -1,8 +1,8 @@
 package com.bbd.oddsshuffle.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,8 +22,12 @@ public class Coupon {
     private UUID couponId;
 
     @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Bet> bets;
 
     @Column(nullable = false)
     private LocalDateTime couponTime;
+
+    @Column(nullable = false)
+    private boolean isExpired;
 }

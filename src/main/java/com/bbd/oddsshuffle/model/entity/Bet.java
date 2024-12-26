@@ -3,6 +3,8 @@ package com.bbd.oddsshuffle.model.entity;
 import com.bbd.oddsshuffle.constants.BetStatus;
 import com.bbd.oddsshuffle.constants.BetType;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -25,6 +27,7 @@ public class Bet {
 
     @ManyToOne
     @JoinColumn(name = "coupon_id", nullable = false)
+    @JsonManagedReference
     private Coupon coupon;
 
     @ManyToOne
