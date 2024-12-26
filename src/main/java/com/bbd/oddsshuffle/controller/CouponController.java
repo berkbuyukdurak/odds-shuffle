@@ -6,8 +6,10 @@ import com.bbd.oddsshuffle.model.dto.response.CouponResponseDTO;
 import com.bbd.oddsshuffle.model.entity.Bet;
 import com.bbd.oddsshuffle.model.entity.Coupon;
 import com.bbd.oddsshuffle.service.CouponService;
+import com.bbd.oddsshuffle.util.GenericResponseHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +27,7 @@ public class CouponController {
     }
 
     @PostMapping
-    public ResponseEntity<CouponResponseDTO> createCoupon(@RequestBody CouponRequestDTO request) {
+    public ResponseEntity<Object> createCoupon(@RequestBody CouponRequestDTO request) {
         try {
             // Convert request DTO to Bet entity
             List<Bet> bets = request.getBets().stream()
@@ -54,15 +56,18 @@ public class CouponController {
                 return betResponse;
             }).collect(Collectors.toList()));
 
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            if (ObjectUtils.isEmpty(response)) {
+                return GenericResponseHandler.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+            }
+            return GenericResponseHandler.successResponse(HttpStatus.CREATED, response);
         } catch (Exception e) {
             System.err.println("Error creating coupon: " + e.getMessage());
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return GenericResponseHandler.errorResponse(HttpStatus.BAD_REQUEST, "Error creating coupon");
         }
     }
 
     @GetMapping("/{couponId}")
-    public ResponseEntity<CouponResponseDTO> getCoupon(@PathVariable("couponId") String couponId) {
+    public ResponseEntity<Object> getCoupon(@PathVariable("couponId") String couponId) {
         try {
             // Fetch coupon by ID
             Coupon coupon = couponService.getCouponById(UUID.fromString(couponId));
@@ -82,9 +87,12 @@ public class CouponController {
                 return betResponse;
             }).collect(Collectors.toList()));
 
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            if (ObjectUtils.isEmpty(response)) {
+                return GenericResponseHandler.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+            }
+            return GenericResponseHandler.successResponse(HttpStatus.OK, response);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return GenericResponseHandler.errorResponse(HttpStatus.NOT_FOUND, "Coupon not found");
         }
     }
 }
