@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Match Odds</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        .loading {
+            text-align: center;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        .odds-up {
+            color: green;
+            font-weight: bold;
+        }
+
+        .odds-down {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h1>Live Match Odds</h1>
+<div id="loading" class="loading">Connecting to WebSocket...</div>
+<table id="matchTable" style="display: none;">
+    <thead>
+    <tr>
+        <th>League</th>
+        <th>Home Team</th>
+        <th>Away Team</th>
+        <th>Home Odds</th>
+        <th>Draw Odds</th>
+        <th>Away Odds</th>
+        <th>Start Time</th>
+    </tr>
+    </thead>
+    <tbody id="matchData">
+    <!-- Dynamic content will be inserted here -->
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const matchTable = document.getElementById('matchTable');
+        const matchData = document.getElementById('matchData');
+        const loadingDiv = document.getElementById('loading');
+
+        const oddsHistory = new Map(); // To track previous odds for changes
+
+        function updateOddsCell(cell, newOdds, matchId, oddsType) {
+            const previousOdds = oddsHistory.get(`${matchId}-${oddsType}`);
+            oddsHistory.set(`${matchId}-${oddsType}`, newOdds);
+
+            if (previousOdds !== undefined) {
+                if (newOdds > previousOdds) {
+                    cell.className = 'odds-up';
+                } else if (newOdds < previousOdds) {
+                    cell.className = 'odds-down';
+                } else {
+                    cell.className = ''; // No change
+                }
+            }
+            cell.textContent = newOdds.toFixed(2);
+        }
+
+        function updateOrAddMatchRow(match) {
+            const startTimeArray = match.startTime;
+            const startTime = new Date(
+                startTimeArray[0],
+                startTimeArray[1] - 1,
+                startTimeArray[2],
+                startTimeArray[3],
+                startTimeArray[4]
+            );
+
+            let existingRow = document.getElementById(match.id);
+
+            if (!existingRow) {
+                existingRow = document.createElement('tr');
+                existingRow.id = match.id;
+                matchData.appendChild(existingRow);
+
+                // Create empty cells for new row
+                for (let i = 0; i < 7; i++) {
+                    existingRow.appendChild(document.createElement('td'));
+                }
+            }
+
+            const cells = existingRow.children;
+            cells[0].textContent = match.league;
+            cells[1].textContent = match.homeTeam;
+            cells[2].textContent = match.awayTeam;
+
+            // Update odds with color changes
+            updateOddsCell(cells[3], match.homeOdds, match.id, 'homeOdds');
+            updateOddsCell(cells[4], match.drawOdds, match.id, 'drawOdds');
+            updateOddsCell(cells[5], match.awayOdds, match.id, 'awayOdds');
+
+            cells[6].textContent = startTime.toLocaleString();
+        }
+
+        function updateMatches(matches) {
+            matches.forEach(match => updateOrAddMatchRow(match));
+
+            loadingDiv.style.display = 'none';
+            matchTable.style.display = 'table';
+        }
+
+        const ws = new WebSocket('ws://localhost:8080/ws/live-match-odds');
+
+        ws.onopen = () => {
+            loadingDiv.textContent = 'Waiting for live match updates...';
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const matches = JSON.parse(event.data);
+                updateMatches(matches);
+            } catch {
+                loadingDiv.textContent = 'Error receiving match updates.';
+            }
+        };
+
+        ws.onerror = () => {
+            loadingDiv.textContent = 'An error occurred. Please refresh the page.';
+        };
+
+        ws.onclose = () => {
+            loadingDiv.textContent = 'Connection lost. Reconnecting...';
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        };
+    });
+</script>
+</body>
+</html>
