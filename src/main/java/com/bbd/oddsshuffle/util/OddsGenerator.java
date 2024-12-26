@@ -17,64 +17,42 @@ public class OddsGenerator {
     private final Random random = new Random();
 
     @Value("${odds.margin.min}")
-    private double minMargin;
+    private double marginMin;
 
     @Value("${odds.margin.max}")
-    private double maxMargin;
+    private double marginMax;
 
     @Value("${odds.limit.min}")
-    private double minOddsLimit;
+    private double oddsLimitMin;
 
     @Value("${odds.limit.max}")
-    private double maxOddsLimit;
+    private double oddsLimitMax;
 
     public double[] generateOdds() {
-        double[] fairOdds = generateFairOdds();
-        double margin = calculateMargin();
+        double margin = roundToTwoDecimalPlaces(marginMin + random.nextDouble() * (marginMax - marginMin));
+        double homeOdds = generateOddsWithinLimit();
+        double awayOdds = generateOddsWithinLimit();
+        double drawOdds = generateOddsWithinLimit();
 
-        // Apply margin and clamp odds
-        DoubleUnaryOperator applyMarginAndClamp = fairOdd ->
-                clamp(margin / fairOdd, minOddsLimit, maxOddsLimit);
+        // Adjust odds by margin
+        homeOdds = adjustOddsByMargin(homeOdds, margin);
+        awayOdds = adjustOddsByMargin(awayOdds, margin);
+        drawOdds = adjustOddsByMargin(drawOdds, margin);
 
-        return roundOdds(
-                applyMarginAndClamp.applyAsDouble(fairOdds[0]),
-                applyMarginAndClamp.applyAsDouble(fairOdds[1]),
-                applyMarginAndClamp.applyAsDouble(fairOdds[2])
-        );
+        return new double[]{homeOdds, drawOdds, awayOdds};
     }
 
-    private double[] generateFairOdds() {
-        double homeWinProb = ThreadLocalRandom.current().nextDouble();
-        double drawProb = ThreadLocalRandom.current().nextDouble();
-        double awayWinProb = ThreadLocalRandom.current().nextDouble();
-
-        double totalProb = homeWinProb + drawProb + awayWinProb;
-        return new double[]{
-                homeWinProb / totalProb,
-                drawProb / totalProb,
-                awayWinProb / totalProb
-        };
+    private double generateOddsWithinLimit() {
+        double odds = oddsLimitMin + random.nextDouble() * (oddsLimitMax - oddsLimitMin);
+        return roundToTwoDecimalPlaces(odds);
     }
 
-    private double calculateMargin() {
-        return 1 + ThreadLocalRandom.current().nextDouble(minMargin, maxMargin);
+    private double adjustOddsByMargin(double odds, double margin) {
+        double adjustedOdds = odds * (1 - margin);
+        return roundToTwoDecimalPlaces(Math.max(oddsLimitMin, Math.min(adjustedOdds, oddsLimitMax)));
     }
 
-    private double[] roundOdds(double... odds) {
-        return new double[]{
-                round(odds[0]),
-                round(odds[1]),
-                round(odds[2])
-        };
-    }
-
-    private double clamp(double value, double min, double max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    private double round(double value) {
-        return BigDecimal.valueOf(value)
-                .setScale(SCALE, RoundingMode.HALF_UP)
-                .doubleValue();
+    private double roundToTwoDecimalPlaces(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }
