@@ -42,7 +42,7 @@ public class OddsService {
             );
             oddsHistoryService.addOddsHistory(match, oddsHistoryRequestDTO);
 
-            System.out.println("Updated odds for match: " + match);
+            System.out.println("Odds updated");
         }
     }
 }

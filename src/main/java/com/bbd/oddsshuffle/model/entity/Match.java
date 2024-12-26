@@ -13,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString(exclude = "oddsHistory")
 public class Match {
 
     @Id
