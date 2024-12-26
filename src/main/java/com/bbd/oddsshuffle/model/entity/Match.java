@@ -25,27 +25,6 @@ public class Match {
     private String awayTeam;
 
     private double homeOdds;
-
-    public void setHomeTeam(String homeTeam) {
-        this.homeTeam = homeTeam;
-    }
-
-    public void setAwayTeam(String awayTeam) {
-        this.awayTeam = awayTeam;
-    }
-
-    public double getHomeOdds() {
-        return homeOdds;
-    }
-
-    public double getDrawOdds() {
-        return drawOdds;
-    }
-
-    public double getAwayOdds() {
-        return awayOdds;
-    }
-
     private double drawOdds;
     private double awayOdds;
 
@@ -53,25 +32,4 @@ public class Match {
     private List<OddsHistory> oddsHistory;
 
     private LocalDateTime startTime;
-
-    // Getters and Setters
-    public UUID getMatchId() {
-        return matchId;
-    }
-
-    public void setMatchId(UUID matchId) {
-        this.matchId = matchId;
-    }
-
-    public void setHomeOdds(double homeOdds) {
-        this.homeOdds = homeOdds;
-    }
-
-    public void setDrawOdds(double drawOdds) {
-        this.drawOdds = drawOdds;
-    }
-
-    public void setAwayOdds(double awayOdds) {
-        this.awayOdds = awayOdds;
-    }
 }
