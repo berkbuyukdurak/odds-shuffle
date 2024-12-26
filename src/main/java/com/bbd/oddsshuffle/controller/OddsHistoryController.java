@@ -2,7 +2,10 @@ package com.bbd.oddsshuffle.controller;
 
 import com.bbd.oddsshuffle.model.dto.response.MatchOddsHistoryDTO;
 import com.bbd.oddsshuffle.service.OddsHistoryService;
+import com.bbd.oddsshuffle.util.GenericResponseHandler;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +23,11 @@ public class OddsHistoryController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<MatchOddsHistoryDTO>> getAllMatchesWithOddsHistory() {
+    public ResponseEntity<Object> getAllMatchesWithOddsHistory() {
         List<MatchOddsHistoryDTO> matchOddsHistory = oddsHistoryService.getAllMatchesWithOddsHistory();
-        return ResponseEntity.ok(matchOddsHistory);
+        if (ObjectUtils.isEmpty(matchOddsHistory)) {
+            return GenericResponseHandler.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+        return GenericResponseHandler.successResponse(HttpStatus.OK, matchOddsHistory);
     }
 }
