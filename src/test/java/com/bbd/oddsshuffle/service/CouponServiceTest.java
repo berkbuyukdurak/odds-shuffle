@@ -31,6 +31,9 @@ class CouponServiceTest {
     private MatchRepository matchRepository;
 
     @Mock
+    private CouponExpirationService couponExpirationService;
+
+    @Mock
     private TaskExecutor taskExecutor;
 
     private static final int COUPON_TIMEOUT = 1; // 1 second for testing
@@ -104,7 +107,7 @@ class CouponServiceTest {
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
 
         // Act
-        couponService.markCouponAsExpired(couponId);
+        couponExpirationService.markCouponAsExpired(couponId);
 
         // Assert
         assertTrue(coupon.isExpired());

@@ -23,14 +23,16 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final MatchRepository matchRepository;
     private final TaskExecutor taskExecutor;
+    private final CouponExpirationService couponExpirationService;
 
     @Value("${oddsshuffle.coupon.timeout}")
     private int couponTimeout; // Timeout in seconds
 
-    public CouponService(CouponRepository couponRepository, MatchRepository matchRepository, TaskExecutor taskExecutor) {
+    public CouponService(CouponRepository couponRepository, MatchRepository matchRepository, TaskExecutor taskExecutor, CouponExpirationService couponExpirationService) {
         this.couponRepository = couponRepository;
         this.matchRepository = matchRepository;
         this.taskExecutor = taskExecutor;
+        this.couponExpirationService = couponExpirationService;
     }
 
     @Transactional
@@ -85,29 +87,18 @@ public class CouponService {
         }
     }
 
-    private void scheduleCouponTimeout(Coupon coupon) {
+    public void scheduleCouponTimeout(Coupon coupon) {
         taskExecutor.execute(() -> {
             try {
-                Thread.sleep(couponTimeout * 1000L);
-                markCouponAsExpired(coupon.getCouponId());
+                Thread.sleep(couponTimeout * 1000L); // Sleep for timeout duration
+                couponExpirationService.markCouponAsExpired(coupon.getCouponId());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.err.println("Coupon timeout interrupted: " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("Error during coupon expiration: " + e.getMessage());
+                e.printStackTrace();
             }
         });
-    }
-
-    @Transactional
-    public void markCouponAsExpired(UUID couponId) {
-        Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new IllegalStateException("Coupon not found for expiration: " + couponId));
-
-        coupon.getBets().forEach(bet -> bet.setStatus(BetStatus.EXPIRED));
-        coupon.setExpired(true);
-
-        // Save the updated coupon
-        couponRepository.save(coupon);
-
-        System.out.println("Coupon marked as expired: " + coupon.getCouponId());
     }
 }
