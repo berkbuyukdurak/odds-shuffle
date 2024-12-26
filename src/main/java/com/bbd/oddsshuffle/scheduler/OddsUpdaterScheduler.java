@@ -1,12 +1,10 @@
 package com.bbd.oddsshuffle.scheduler;
 
-import com.bbd.oddsshuffle.model.dto.response.MatchResponseDTO;
 import com.bbd.oddsshuffle.service.OddsService;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class OddsUpdaterScheduler {
@@ -18,8 +16,7 @@ public class OddsUpdaterScheduler {
     }
 
     @Scheduled(fixedRateString = "${oddsshuffle.scheduled.fixedRate}")
-    public void updateOddsPeriodically() {
-        System.out.println("Updating odds...");
+    public void updateOddsPeriodically() throws JsonProcessingException {
         oddsService.updateOdds();
     }
 }
