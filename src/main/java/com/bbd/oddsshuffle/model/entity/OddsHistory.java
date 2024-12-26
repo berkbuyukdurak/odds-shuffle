@@ -23,19 +23,63 @@ public class OddsHistory {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
-    @Column(nullable = false)
     private double homeOdds;
-
-    @Column(nullable = false)
     private double drawOdds;
 
-    @Column(nullable = false)
     private double awayOdds;
 
-    @Column(nullable = false)
     private LocalDateTime timestamp;
+
+    // Getters and Setters
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Match getMatch() {
+        return match;
+    }
+
+    public void setMatch(Match match) {
+        this.match = match;
+    }
+
+    public double getHomeOdds() {
+        return homeOdds;
+    }
+
+    public void setHomeOdds(double homeOdds) {
+        this.homeOdds = homeOdds;
+    }
+
+    public double getDrawOdds() {
+        return drawOdds;
+    }
+
+    public void setDrawOdds(double drawOdds) {
+        this.drawOdds = drawOdds;
+    }
+
+    public double getAwayOdds() {
+        return awayOdds;
+    }
+
+    public void setAwayOdds(double awayOdds) {
+        this.awayOdds = awayOdds;
+    }
+
+    public LocalDateTime getUpdatedTime() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 }
